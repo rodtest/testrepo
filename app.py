@@ -1,47 +1,19 @@
-#!/usr/bin/env python3
-# --------------------------------------------------- #
-# ----------- BASIC IMPORTS AND VARIABLES ----------- #
-# --------------------------------------------------- #
-
-from github import Github, InputGitTreeElement
+#!/usr/bin/env python
+from git import Repo  # pip install GitPython
 from time import time
-import base64
 
-from CREDENTIALS import CREDENTIAL
-
-current_unix = time()
-user = CREDENTIAL['USERNAME']
-password = CREDENTIAL['PASSWORD']
-
-g = Github(user, password)
-
-
-# --------------------------------------------------- #
-# --------------- REPO AND FILE INFO ---------------- #
-# --------------------------------------------------- #
-
-repo = g.get_user().get_repo('githubflask')
-file_list = ["app.py", "app2.py"]
-
-commit_message = 'Add simple regression analysis'
+repo_dir = ''  # path to files
+repo = Repo(repo_dir)
+file_list = [  # list of files to updates in repo_dir
+    'app.py',
+    'app2.py',
+    'app3.py'
+]
+commit_message = 'Updated {}'.format(time())  # commit message logs unix time
+repo.index.add(file_list)
+repo.index.commit(commit_message)
+origin = repo.remote('origin')
+origin.push()
 
 
-# --------------------------------------------------- #
-# ---------------------- LOGIC ---------------------- #
-# --------------------------------------------------- #
 
-master_ref = repo.get_git_ref('heads/master')
-master_sha = master_ref.object.sha
-base_tree = repo.get_git_tree(master_sha)
-element_list = list()
-for entry in file_list:
-    with open(entry, 'rb') as input_file:
-        data = input_file.read()
-    if entry.endswith('.png'):
-        data = base64.b64encode(data)
-    element = InputGitTreeElement(entry, '100644', 'blob', data)
-    element_list.append(element)
-tree = repo.create_git_tree(element_list, base_tree)
-parent = repo.get_git_commit(master_sha)
-commit = repo.create_git_commit(commit_message, tree, [parent])
-master_ref.edit(commit.sha)
