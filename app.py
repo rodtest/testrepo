@@ -37,6 +37,8 @@ element_list = list()
 for entry in file_list:
     with open(entry, 'rb') as input_file:
         data = input_file.read()
+    if entry.endswith('.png'):
+        data = base64.b64encode(data)
     element = InputGitTreeElement(entry, '100644', 'blob', data)
     element_list.append(element)
 tree = repo.create_git_tree(element_list, base_tree)
