@@ -1,0 +1,54 @@
+{
+    "HeartbeatInterval": "3055",
+    "HeartbeatOrigin": "ThirdPartyABCD",
+    "HeartbeatType": "IdlePoll",
+    "ConnectTimesIdentifier": "d",
+    "ReceiveBufferSize": "20971520",
+    "ReuseAddress": "1",
+    "HighActivityTimesIdentifier": "4",
+    "LoActTimeOut": "360",
+    "HiActTimeOut": "60",
+    "MonitorInactivity": "True",
+    "venuespecific": [
+        {
+            "Animals": "Cow",
+            "Clothes": "Pants"
+        }
+    ],
+    "realtime": [
+        {
+            "ChannelType": "udp",
+            "thread": "th0",
+            "line_id": "asdf",
+            "multicast": {
+                "a": {
+                    "nic": "123",
+                    "port": "123",
+                    "endpoint": "12.11.256.1"
+                },
+                "b": {
+                    "nic": "123",
+                    "port": "123",
+                    "endpoint": "12.11.255.1"
+                }
+            }
+        },
+        {
+            "ChannelType": "1",
+            "thread": "2",
+            "line_id": "3",
+            "multicast": {
+                "a": {
+                    "nic": "4",
+                    "port": "5",
+                    "endpoint": "6"
+                },
+                "b": {
+                    "nic": "7",
+                    "port": "8",
+                    "endpoint": "9"
+                }
+            }
+        }
+    ]
+}
