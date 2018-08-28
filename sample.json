@@ -1,5 +1,5 @@
 {
-    "HeartbeatInterval": "3055",
+    "HeartbeatInterval": "3",
     "HeartbeatOrigin": "ThirdPartyABCD",
     "HeartbeatType": "IdlePoll",
     "ConnectTimesIdentifier": "d",
