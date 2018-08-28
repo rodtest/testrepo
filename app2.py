@@ -1,47 +1,90 @@
 #!/usr/bin/env python3
-# --------------------------------------------------- #
-# ----------- BASIC IMPORTS AND VARIABLES ----------- #
-# --------------------------------------------------- #
-
-from github import Github, InputGitTreeElement
+# ------------------------------------------------------------------------------------------------------------------- #
+# ------------------------------------------- BASIC IMPORTS AND VARIABLES ------------------------------------------- #
+# ------------------------------------------------------------------------------------------------------------------- #
 from time import time
-import base64
+import os
+import json
+from pprint import pprint
+# import base64
+
+from github import Github
 
 from CREDENTIALS import CREDENTIAL
 
 current_unix = time()
+
+# ------------------------------------------------------------------------------------------------------------------- #
+# ----------------------------------------------- REPO AND FILE INFO ------------------------------------------------ #
+# ------------------------------------------------------------------------------------------------------------------- #
+
 user = CREDENTIAL['USERNAME']
 password = CREDENTIAL['PASSWORD']
-
 g = Github(user, password)
 
+repository = 'githubflask'
+repo = g.get_user().get_repo(repository)
 
-# --------------------------------------------------- #
-# --------------- REPO AND FILE INFO ---------------- #
-# --------------------------------------------------- #
+payload = "sample.json"
+commit_message = 'Updated {payload} at {time}'.format(payload=payload,time=time())
 
-repo = g.get_user().get_repo('githubflask')
-file_list = ["app.py", "app2.py"]
+#
+# # get the file's SHA
+# SHA_output = "user_json.json"
+# os.system('curl https://api.github.com/repos/{user}/{repository}/contents/{file} > {SHA_output}'.format(
+#                                                                         user=user,
+#                                                                         password=password,
+#                                                                         repository=repository,
+#                                                                         file=payload,
+#                                                                         SHA_output=SHA_output))
+# with open(SHA_output) as SHA_file:
+#     SHA_data = json.loads(SHA_file.read())['sha']
+# os.system('rm {}'.format(SHA_output))
+#
+# # ------------------------------------------------------------------------------------------------------------------- #
+# # ------------------------------------------------------ LOGIC ------------------------------------------------------ #
+# # ------------------------------------------------------------------------------------------------------------------- #
+#
+#
+# # get the json in string form
+# # file = repo.get_file_contents(payload)
+# # print(file)
+# with open(payload) as f:
+#     data = json.dumps(json.loads(f.read())).encode()
+# repo.update_file(payload, commit_message, data, SHA_data)
 
-commit_message = 'Add simple regression analysis'
+
+def list_branches():
+    # list branches
+    os.system('curl https://api.github.com/repos/{user}/{repository}/branches'.format(
+        user=user,
+        repository=repository
+    ))
 
 
-# --------------------------------------------------- #
-# ---------------------- LOGIC ---------------------- #
-# --------------------------------------------------- #
+def get_tree_sha():
+    # list branches
+    os.system('curl https://api.github.com/repos/{user}/{repository}/branches/master > tree_sha.json'.format(
+        user=user,
+        repository=repository
+    ))
+    with open("tree_sha.json") as SHA_file:
+        data = json.loads(SHA_file.read())['commit']['commit']['tree']['sha']
+    os.system('rm {}'.format("tree_sha.json"))
+    return data
 
-master_ref = repo.get_git_ref('heads/master')
-master_sha = master_ref.object.sha
-base_tree = repo.get_git_tree(master_sha)
-element_list = list()
-for entry in file_list:
-    with open(entry, 'rb') as input_file:
-        data = input_file.read()
-    if entry.endswith('.png'):
-        data = base64.b64encode(data)
-    element = InputGitTreeElement(entry, '100644', 'blob', data)
-    element_list.append(element)
-tree = repo.create_git_tree(element_list, base_tree)
-parent = repo.get_git_commit(master_sha)
-commit = repo.create_git_commit(commit_message, tree, [parent])
-master_ref.edit(commit.sha)
+
+def get_parent_sha():
+    # list branches
+    os.system('curl https://api.github.com/repos/{user}/{repository}/branches > parent_sha.json'.format(
+        user=user,
+        repository=repository
+    ))
+    with open("parent_sha.json") as SHA_file:
+        data = json.loads(SHA_file.read())
+    os.system('rm {}'.format("parent_sha.json"))
+    return data
+
+
+pprint(get_parent_sha())
+
