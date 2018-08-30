@@ -2,7 +2,8 @@
 # ------------------------------------------------------------------------------------------------------------------- #
 # ------------------------------------------- BASIC IMPORTS AND VARIABLES ------------------------------------------- #
 # ------------------------------------------------------------------------------------------------------------------- #
-from time import time
+import datetime
+
 import os
 import json
 from pprint import pprint
@@ -12,7 +13,7 @@ from github import Github
 
 from CREDENTIALS import CREDENTIAL
 
-current_unix = time()
+current_time = datetime.datetime.now().isoformat()
 
 # ------------------------------------------------------------------------------------------------------------------- #
 # ----------------------------------------------- REPO AND FILE INFO ------------------------------------------------ #
@@ -26,7 +27,7 @@ repository = 'githubflask'
 repo = g.get_user().get_repo(repository)
 
 payload = "sample.json"
-commit_message = 'Updated {payload} at {time}'.format(payload=payload,time=time())
+commit_message = '{user} - Updated "{payload}" at {time}'.format(user=user, payload=payload, time=current_time)
 
 #
 # # get the file's SHA
@@ -74,7 +75,7 @@ def get_tree_sha():
     return data
 
 
-def get_parent_sha():
+def get_parent_sha(branch):
     # list branches
     os.system('curl https://api.github.com/repos/{user}/{repository}/branches > parent_sha.json'.format(
         user=user,
@@ -83,8 +84,29 @@ def get_parent_sha():
     with open("parent_sha.json") as SHA_file:
         data = json.loads(SHA_file.read())
     os.system('rm {}'.format("parent_sha.json"))
-    return data
+    data = [x for x in data if x['name'] == branch]
+    return data[0]['commit']['sha']
 
 
-pprint(get_parent_sha())
+def commit_to_branch(branch):
+    json_payload = {
+                          "message": commit_message,
+                          "author": {
+                            "name": user,
+                            "date": current_time
+                          },
+                          "parents": [
+                            get_parent_sha(branch)
+                          ],
+                          "tree": get_tree_sha()
+                    }
+    url = "https://api.github.com/repos/{user}/{repository}/git/commits".format(user=user, repository=repository)
 
+    curl_string = """curl -d '{json_payload}' -H "Content-Type: application/json" -X POST {url}""".format(
+                                                                        json_payload=json.dumps(json_payload),
+                                                                        url=url)
+
+    os.system(curl_string)
+
+
+commit_to_branch("new_branch_test")
